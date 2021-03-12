@@ -1,58 +1,56 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, {  useEffect, useRef, useState } from 'react'
 import OBSWebScoket from 'obs-websocket-js'
 import { 
   Button,
   Checkbox,
+  Form,
   Input 
 } from 'antd'
 import './App.css';
 
 const PASSWORD = process.env.REACT_APP_PASSWORD
-const medias = [
-  "Timelapse03_720.mov",
-  "Timelapse09_720.mov",
-  "polygon01_720.mp4",
-  "polygon09_720.mp4",
-  "trailer_big_buck_bunny.ogg",
-]
 
 function App() {
   const _obs = useRef()
-  const [ _mediaSourceType, setMediaSourceType ] = useState('')
-  const [ _mediaSourceSettings, setMediaSourceSettings ] = useState(null)
-  const [ _telopText, setTelopText ] = useState('')
+  const [ _obsAddress, setObsAddress] = useState('')
+  const [ _sceneItems, setSceneItems ] = useState([])
+  const [ _telop, setTelop ] = useState('')
 
   useEffect(() => {
+    if( _obsAddress === '' ) return
     ( async () => {
       _obs.current = new OBSWebScoket()
       const password = PASSWORD || ''
 
+      console.log( _obsAddress )
       await _obs.current.connect({
-        address: 'localhost:4444',
+        address: `${_obsAddress}:4444`,
         password
       }).catch( err => {throw err})
 
-      console.log( 'succeeded connecting to obss')
+      console.log( 'succeeded connecting to obs')
 
-      const telop = await _obs.current.send('GetTextFreetype2Properties', {source: 'telop'})
-      setTelopText( telop.text )
-      console.log( telop )
+      const res = await _obs.current.send('GetSceneItemList')
+      console.log( res )
+      const sceneItems = res.sceneItems
+      for( let item of sceneItems ) {
+        const res = await _obs.current.send('GetSceneItemProperties', { item: { id: item.itemId } } )
+          .catch( err => console.warn( err ))
+        console.log( item, res )
+        if( item.sourceKind === "text_gdiplus_v2" ) {
+          console.log( item.itemId )
+          const resTextSource = await _obs.current.send('GetTextGDIPlusProperties', { source: item.sourceName } )
+          console.log( resTextSource.text)
+          setTelop( resTextSource.text )
+          item.text = resTextSource.text
+        }
+        item.visible = res.visible
+      }
 
-      const mediaSettings = await _obs.current.send('GetSourceSettings', {sourceName: 'media'})
-      setMediaSourceType( mediaSettings.sourceType )
-      setMediaSourceSettings( mediaSettings.sourceSettings )
-
-      const browserSettings = await _obs.current.send('GetSourceSettings', {sourceName: 'browser'})
-      console.log( browserSettings.sourceType )
-      console.log( browserSettings.sourceSettings )
-
-      const sceneList = await _obs.current.send('GetSceneList')
-      console.log( 'current-scene:', sceneList.currentScene )
-      sceneList.scenes.forEach( (scene, idx) => {
-        console.log( `[${idx}] ${scene.name}` )
-      })
+      console.log( sceneItems )
+      setSceneItems( sceneItems )
     })()
-  }, [])
+  }, [ _obsAddress ])
   return (
     <div className="App">
       <header>
@@ -60,51 +58,82 @@ function App() {
       </header>
       <main>
         <div>
-          Telop: <Input style={{width: "30vw"}} value={_telopText} onChange={ async e => {
-            const text = e.target.value
-            setTelopText( text )
-            if( _obs.current ) {
-              await _obs.current.send('SetTextFreetype2Properties', {
-                source: 'telop',
-                text
-              })
-            }
-          }}/>
-          &nbsp;
-          render - 
-          <Checkbox onChange={ async e => {
-            const checked = e.target.checked
-            if( _obs.current ) {
-              await _obs.current.send('SetSceneItemRender', {
-                source: 'telop',
-                render: checked
-              })
-            }
-          } }/>
+          <Form
+            name="connect"
+            initialValues={{
+              obsAddress: _obsAddress,
+            }}
+            onFinish={obj => setObsAddress(obj.obsAddress)}
+            onFinishFailed={e => console.error(e)}
+          >
+            <Form.Item
+              label="obsAddress"
+              name="obsAddress"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input obs address!',
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
+                Connect
+              </Button>
+            </Form.Item>
+          </Form>
         </div>
         <div>
-          Media:<br/>
-          source type: {_mediaSourceType}<br/>
-          source settings:
-          { _mediaSourceSettings ? 
-            (<pre>{ JSON.stringify(_mediaSourceSettings, null, 2 ) }</pre>) : 
-            (<div></div>)
+          <h3>Video</h3>
+          { _sceneItems.filter( o => o.sourceKind === "ffmpeg_source")
+            .map( (item, idx) => (
+              <div key={idx}>
+                {item.itemId}: {item.sourceName}
+                <Checkbox 
+                  defaultChecked={ item.visible }
+                  onClick={ async e => {
+                    const checked = e.target.checked
+                    if(_obs.current) {
+                      await _obs.current.send( 'SetSceneItemProperties', { item: {id: item.itemId }, visible: checked })
+                      console.log("sent")
+                    }
+                  }}
+                />
+              </div>
+            ))
           }
-          { medias.map( (media, idx) => (
-            <Button onClick={ async () => {
-              const input = `http://localhost:3000/video/${media}`
-              const sourceSettings = Object.assign( {}, _mediaSourceSettings, { input })
-              setMediaSourceSettings(sourceSettings)
-              await _obs.current.send('SetSourceSettings', { 
-                sourceName: 'media',
-                sourceType: _mediaSourceType,
-                sourceSettings
-              })
-            }}>change{media}</Button>
-          ))}
-
         </div>
-
+        <div>
+          <h3>Text</h3>
+          { _sceneItems.filter( o => o.sourceKind === "text_gdiplus_v2")
+            .map( (item, idx) => (
+              <div key={idx}>
+                {item.itemId}: {item.sourceName}
+                <Input 
+                  value={_telop} 
+                  onChange={ e => {
+                    const telop= e.target.value
+                    setTelop(telop)
+                  }}
+                />
+                <Button 
+                  type="primary"
+                  onClick={ async () => {
+                    await _obs.current.send('SetTextGDIPlusProperties', {
+                      source: item.sourceName,
+                      text: _telop
+                    })
+                  }}
+                  danger
+                >
+                  update
+                </Button>
+              </div>
+            ))
+          }
+        </div>
       </main>
     </div>
   );
