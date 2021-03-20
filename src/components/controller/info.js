@@ -33,18 +33,17 @@ export default function Info(props) {
 
       timer = setInterval( async () => {
         const res = await obs.send('GetStats')
-        console.log( res.stats )
 
         if( res.status === 'ok' ) {
-          setAverageFrameTime( res.stats['average-frame-time'].toFixed(2) )
-          setCpuUsage( res.stats['cpu-usage'].toFixed(2) )
-          setFps( res.stats['fps'].toFixed(2) )
-          setFreeDiskSpace( res.stats['free-disk-space'].toFixed(2) )
-          setMemoryUsage( res.stats['memory-usage'].toFixed(2) )
-          setOutputSkippedFrames( res.stats['output-skipped-frames'] )
-          setOutputTotalFrames( res.stats['output-total-frames'] )
-          setRenderMissedFrames( res.stats['render-missed-frames'] ) 
-          setRenderTotalFrames( res.stats['render-total-frames'] )
+          if( res.stats['average-frame-time'] ) setAverageFrameTime( res.stats['average-frame-time'].toFixed(2) )
+          if( res.stats['cpu-usage'] ) setCpuUsage( res.stats['cpu-usage'].toFixed(2) )
+          if( res.stats['fps'] ) setFps( res.stats['fps'].toFixed(2) )
+          if( res.stats['free-disk-space'] ) setFreeDiskSpace( res.stats['free-disk-space'].toFixed(2) )
+          if( res.stats['memory-usage'] ) setMemoryUsage( res.stats['memory-usage'].toFixed(2) )
+          if( res.stats['output-skipped-frames'] ) setOutputSkippedFrames( res.stats['output-skipped-frames'] )
+          if( res.stats['output-total-frames'] ) setOutputTotalFrames( res.stats['output-total-frames'] )
+          if( res.stats['render-missed-frames'] ) setRenderMissedFrames( res.stats['render-missed-frames'] ) 
+          if( res.stats['render-total-frames'] ) setRenderTotalFrames( res.stats['render-total-frames'] )
         }
       }, 1000)
     })()

@@ -3,6 +3,7 @@ import {
   Button,
   Card,
   Col,
+  Checkbox,
   Input,
   Row,
   Typography,
@@ -13,13 +14,13 @@ import { EditOutlined } from '@ant-design/icons'
 const { Title } = Typography
 
 export default function Text( props ) {
-  const { sceneItems, obs } = props
+  const { sceneItems, obs, title } = props
 
   return (
     <div className="Text">
       <Card title={<Title level={3}>
         <EditOutlined/>&nbsp;
-        item: text
+        item: {title}
       </Title>}>
       { sceneItems.filter(o => (
         o.sourceKind === "text_gdiplus_v2" ||
@@ -28,7 +29,17 @@ export default function Text( props ) {
         .map((item, idx) => (
           <Row gutter={16} key={idx}>
             <Col span={3} style={{ textAlign: "right" }}>
+              <Checkbox 
+                defaultChecked={ item.visible }
+                onClick={ async e => {
+                  const checked = e.target.checked
+                  if(obs) {
+                    await obs.send( 'SetSceneItemProperties', { item: {id: item.itemId }, visible: checked })
+                  }
+                }}
+              >
               {item.sourceName}
+              </Checkbox>
             </Col>
             <Col span={15}>
               <Input

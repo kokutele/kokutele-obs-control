@@ -4,23 +4,22 @@ import {
   Checkbox,
   Typography
 } from 'antd'
-import { PlaySquareOutlined } from '@ant-design/icons'
+import { CameraOutlined } from '@ant-design/icons'
 
 const { Title } = Typography
 
-export default function Video(props) {
-  const { sceneItems, obs, cm, title } = props
+export default function Camera(props) {
+  const { sceneItems, obs, title } = props
 
   return (
-    <div className="Video">
+    <div className="Camera">
       <Card title={
         <Title level={3}>
-          <PlaySquareOutlined/>&nbsp;
+          <CameraOutlined/>&nbsp;
           item: {title}
         </Title>}>
       { sceneItems
-        .filter( item => item.sourceKind === "ffmpeg_source")
-        .filter( item => cm ? item.sourceName.toLowerCase().includes('cm') : !item.sourceName.toLowerCase().includes('cm') )
+        .filter( item => item.sourceKind === "av_capture_input")
         .map( (item, idx) => (
           <div key={idx}>
             <Checkbox 

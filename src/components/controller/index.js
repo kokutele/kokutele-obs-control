@@ -6,6 +6,7 @@ import OBSWebScoket from 'obs-websocket-js'
 
 import Info from './info'
 import Text from './text'
+import Camera from './camera'
 import Video from './video'
 
 export default function Controller(props) {
@@ -13,6 +14,8 @@ export default function Controller(props) {
 
   const [ _obs, setObs ] = useState()
   const [ _sceneItems, setSceneItems ] = useState([])
+
+  const span=8
 
   useEffect(() => {
     if( !obsAddress ) return
@@ -45,6 +48,7 @@ export default function Controller(props) {
         }
 
         item.visible = res.visible
+        console.log( item, res )
       }
 
       setSceneItems( sceneItems )
@@ -58,11 +62,36 @@ export default function Controller(props) {
         width: "100%"
       }}>
         <Row gutter={16}>
-          <Col span={12}>
-            <Video sceneItems={ _sceneItems } obs={ _obs } />
+          <Col span={span}>
+            <Video 
+              title="video" 
+              sceneItems={ _sceneItems } 
+              cm={false}
+              obs={ _obs } 
+            />
           </Col>
-          <Col span={12}>
-            <Text sceneItems={ _sceneItems } obs={ _obs } />
+          <Col span={span}>
+            <Video 
+              title="CM" 
+              sceneItems={ _sceneItems } 
+              cm={true}
+              obs={ _obs } 
+          />
+          </Col>
+          <Col span={span}>
+            <Camera 
+              title="camera" 
+              sceneItems={ _sceneItems } 
+              cm={true}
+              obs={ _obs } 
+          />
+          </Col>
+          <Col span={24}>
+            <Text 
+              title="telop"
+              sceneItems={ _sceneItems } 
+              obs={ _obs } 
+            />
           </Col>
         </Row>
         <Info obsAddress={obsAddress} obs={_obs} />
