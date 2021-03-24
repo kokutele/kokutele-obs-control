@@ -57,7 +57,6 @@ export default function Lyrics(props) {
           {_lyrics.map( (line, idx) => (
             <div key={idx}>
               <Button 
-                danger
                 type="default" 
                 icon={<ArrowUpOutlined/>}
                 onClick={ () => onUpdate(line) }
