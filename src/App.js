@@ -25,7 +25,7 @@ function App() {
         <div>
           <Login 
             onSubmit={ item => {
-              setObsAddress( item.obsAddress)
+              setObsAddress( item.obsAddress )
               setPassword( item.password )
             } } 
           />

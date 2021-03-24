@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Button,
   Card,
@@ -11,10 +11,23 @@ import {
 
 import { EditOutlined } from '@ant-design/icons'
 
+import LyricsTabs from './lyrics-tabs'
+
 const { Title } = Typography
 
 export default function Text( props ) {
   const { sceneItems, obs, title } = props
+  const [ _telop, setTelop ] = useState('')
+
+  useEffect( () => {
+    sceneItems.filter(o => (
+      o.sourceKind === "text_gdiplus_v2" ||
+      o.sourceKind === "text_ft2_source_v2"
+    ))
+    .forEach( item => {
+      setTelop( item.text )
+    })
+  }, [ sceneItems ])
 
   return (
     <div className="Text">
@@ -43,16 +56,17 @@ export default function Text( props ) {
             </Col>
             <Col span={15}>
               <Input
-                defaultValue={item.text}
+                value={_telop}
                 onChange={e => {
                   const text = e.target.value
-                  item.text = text
+                  setTelop( text )
                 }}
               />
             </Col>
             <Col span={6}>
               <Button
                 type="primary"
+                danger
                 onClick={async () => {
                   const cmd = item.sourceKind === "text_gdiplus_v2" ?
                     'SetTextGDIPlusProperties' :
@@ -60,12 +74,15 @@ export default function Text( props ) {
 
                   await obs.send(cmd, {
                     source: item.sourceName,
-                    text: item.text
+                    text: _telop
                   })
                 }}
               >
                 update
               </Button>
+            </Col>
+            <Col span={24}>
+              <LyricsTabs onUpdate={ setTelop } />
             </Col>
           </Row>
         ))

@@ -19,7 +19,10 @@ export default function Camera(props) {
           item: {title}
         </Title>}>
       { sceneItems
-        .filter( item => item.sourceKind === "av_capture_input")
+        .filter( item => (
+          item.sourceKind === "av_capture_input" ||
+          item.sourceKind === "dshow_input"
+        ))
         .map( (item, idx) => (
           <div key={idx}>
             <Checkbox 

@@ -14,17 +14,30 @@ const tailLayout = {
 export default function Login(props) {
   const { onSubmit } = props
 
+  const key = 'obs-address'
+
+  if( !localStorage.getItem(key) ) {
+    localStorage.setItem( key, '' )
+  }
+
+  const _obsAddress = localStorage.getItem( key )
+
+
   return (
     <div className="Login">
       <Card title={<Title level={3}>Connect to OBS</Title>}>
+        {_obsAddress}
         <Form
           {...layout}
           name="connect"
           initialValues={{
-            obsAddress: '',
+            obsAddress: _obsAddress,
             password: ''
           }}
-          onFinish={ onSubmit }
+          onFinish={ item => {
+            localStorage.setItem( key, item.obsAddress )
+            onSubmit( item )
+          }}
           onFinishFailed={e => console.warn(e)}
         >
           <Form.Item
