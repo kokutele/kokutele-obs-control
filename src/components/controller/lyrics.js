@@ -18,6 +18,7 @@ export default function Lyrics(props) {
   const key = `${PREFIX}-${id}`
 
   const [ _lyrics, setLyrics ] = useState([])
+  const [ _selectedId, setSelectedId ] = useState(-1)
 
   const onChange = (e) => {
     const lines = e.target.value.split("\n")
@@ -59,9 +60,12 @@ export default function Lyrics(props) {
               <Button 
                 type="default" 
                 icon={<ArrowUpOutlined/>}
-                onClick={ () => onUpdate(line) }
+                onClick={ () => {
+                  setSelectedId( idx )
+                  onUpdate(line) 
+                }}
               />
-              &nbsp;[{idx}] {line}
+              &nbsp; { _selectedId === idx ? (<b>[{idx}] {line}</b>) : (<span>[{idx}] {line}</span>) }
             </div>
           ))}
           </div>

@@ -39,7 +39,12 @@ export default function Text( props ) {
         o.sourceKind === "text_gdiplus_v2" ||
         o.sourceKind === "text_ft2_source_v2"
       ))
-        .map((item, idx) => (
+        .map((item, idx) => {
+          const cmd = item.sourceKind === "text_gdiplus_v2" ?
+            'SetTextGDIPlusProperties' :
+            'SetTextFreetype2Properties'
+
+          return(
           <Row gutter={16} key={idx}>
             <Col span={3} style={{ textAlign: "right" }}>
               <Checkbox 
@@ -68,10 +73,6 @@ export default function Text( props ) {
                 type="primary"
                 danger
                 onClick={async () => {
-                  const cmd = item.sourceKind === "text_gdiplus_v2" ?
-                    'SetTextGDIPlusProperties' :
-                    'SetTextFreetype2Properties'
-
                   await obs.send(cmd, {
                     source: item.sourceName,
                     text: _telop
@@ -82,10 +83,16 @@ export default function Text( props ) {
               </Button>
             </Col>
             <Col span={24}>
-              <LyricsTabs onUpdate={ setTelop } />
+              <LyricsTabs onUpdate={ async telop => {
+                setTelop(telop)
+                await obs.send(cmd, {
+                    source: item.sourceName,
+                    text: telop
+                })
+              }} />
             </Col>
-          </Row>
-        ))
+          </Row>)
+        })
       }
       </Card>
     </div>
