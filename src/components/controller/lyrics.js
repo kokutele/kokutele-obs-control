@@ -44,7 +44,7 @@ export default function Lyrics(props) {
         </Col>
         <Col span={12}>
           <div>
-            <TextArea value={ _lyrics.join("\n") } rows={8} onChange={ onChange }></TextArea>
+            <TextArea value={ _lyrics.join("\n") } rows={24} onChange={ onChange }></TextArea>
           </div>
         </Col>
         <Col>
@@ -53,7 +53,7 @@ export default function Lyrics(props) {
           Updated lyrics here.
           </>
         ):(
-          <>
+          <div style={{width: "45vw", height: "50vh", overflow: "scroll", border: "2px solid #ccc", padding: "6px"}}>
           {_lyrics.map( (line, idx) => (
             <div key={idx}>
               <Button 
@@ -64,7 +64,7 @@ export default function Lyrics(props) {
               &nbsp;[{idx}] {line}
             </div>
           ))}
-          </>
+          </div>
         )}
         </Col>
       </Row>

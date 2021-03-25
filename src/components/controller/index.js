@@ -8,6 +8,7 @@ import Info from './info'
 import Text from './text'
 import Camera from './camera'
 import Video from './video'
+import Image from './image'
 
 export default function Controller(props) {
   const { obsAddress, password } = props
@@ -15,7 +16,7 @@ export default function Controller(props) {
   const [ _obs, setObs ] = useState()
   const [ _sceneItems, setSceneItems ] = useState([])
 
-  const span=8
+  const span=6
 
   useEffect(() => {
     if( !obsAddress ) return
@@ -75,6 +76,13 @@ export default function Controller(props) {
               title="CM" 
               sceneItems={ _sceneItems } 
               cm={true}
+              obs={ _obs } 
+          />
+          </Col>
+          <Col span={span}>
+            <Image 
+              title="image" 
+              sceneItems={ _sceneItems } 
               obs={ _obs } 
           />
           </Col>

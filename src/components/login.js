@@ -26,7 +26,6 @@ export default function Login(props) {
   return (
     <div className="Login">
       <Card title={<Title level={3}>Connect to OBS</Title>}>
-        {_obsAddress}
         <Form
           {...layout}
           name="connect"
